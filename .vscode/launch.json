@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Debug Product",
+            "request": "launch",
+            "mainClass": "Product",
+            "cwd": "${workspaceFolder}/../.."
+        },
+        {
+            "type": "java",
+            "name": "Debug ProductCsvApp",
+            "request": "launch",
+            "mainClass": "ProductCsvApp",
+            "cwd": "${workspaceFolder}/../.."
+        }
+    ]
+}
