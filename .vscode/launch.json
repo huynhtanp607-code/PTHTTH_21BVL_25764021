@@ -3,17 +3,12 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Debug Product",
+            "name": "HostInspector",
             "request": "launch",
-            "mainClass": "Product",
-            "cwd": "${workspaceFolder}/../.."
-        },
-        {
-            "type": "java",
-            "name": "Debug ProductCsvApp",
-            "request": "launch",
-            "mainClass": "ProductCsvApp",
-            "cwd": "${workspaceFolder}/../.."
+            "mainClass": "Lab_4.HostInspector",
+            "args": [
+                "localhost"
+            ]
         }
     ]
 }
