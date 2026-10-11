@@ -1,0 +1,3 @@
+Xin chào Phát!
+Hôm nay mình học lập trình Java Socket.
+Kiểm tra truyền file TCP an toàn.

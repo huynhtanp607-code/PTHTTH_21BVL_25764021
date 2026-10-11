@@ -3,6 +3,104 @@
     "configurations": [
         {
             "type": "java",
+            "name": "DiscoveryClient",
+            "request": "launch",
+            "mainClass": "Lab_4.Bai10.DiscoveryClient",
+            "projectName": "PTHTTH_21BVL_25764021_41704210"
+        },
+        {
+            "type": "java",
+            "name": "DiscoveryServer",
+            "request": "launch",
+            "mainClass": "Lab_4.Bai10.DiscoveryServer",
+            "projectName": "PTHTTH_21BVL_25764021_41704210"
+        },
+        {
+            "type": "java",
+            "name": "MulticastSender",
+            "request": "launch",
+            "mainClass": "Lab_4.Bai9.MulticastSender",
+            "projectName": "PTHTTH_21BVL_25764021_41704210"
+        },
+        {
+            "type": "java",
+            "name": "MulticastReceiver",
+            "request": "launch",
+            "mainClass": "Lab_4.Bai9.MulticastReceiver",
+            "projectName": "PTHTTH_21BVL_25764021_41704210"
+        },
+        {
+            "type": "java",
+            "name": "FileClient",
+            "request": "launch",
+            "mainClass": "Lab_4.Bai8.FileClient",
+            "projectName": "PTHTTH_21BVL_25764021_41704210"
+        },
+        {
+            "type": "java",
+            "name": "FileServer",
+            "request": "launch",
+            "mainClass": "Lab_4.Bai8.FileServer",
+            "projectName": "PTHTTH_21BVL_25764021_41704210"
+        },
+        {
+            "type": "java",
+            "name": "LogClient",
+            "request": "launch",
+            "mainClass": "Lab_4.Bai7.LogClient",
+            "projectName": "PTHTTH_21BVL_25764021_41704210"
+        },
+        {
+            "type": "java",
+            "name": "LogServer",
+            "request": "launch",
+            "mainClass": "Lab_4.Bai7.LogServer",
+            "projectName": "PTHTTH_21BVL_25764021_41704210"
+        },
+        {
+            "type": "java",
+            "name": "TcpUdpClient",
+            "request": "launch",
+            "mainClass": "Lab_4.Bai6.TcpUdpClient",
+            "projectName": "PTHTTH_21BVL_25764021_41704210"
+        },
+        {
+            "type": "java",
+            "name": "TcpUdpServer",
+            "request": "launch",
+            "mainClass": "Lab_4.Bai6.TcpUdpServer",
+            "projectName": "PTHTTH_21BVL_25764021_41704210"
+        },
+        {
+            "type": "java",
+            "name": "ChatClient",
+            "request": "launch",
+            "mainClass": "Lab_4.Bai5.ChatClient",
+            "projectName": "PTHTTH_21BVL_25764021_41704210"
+        },
+        {
+            "type": "java",
+            "name": "ChatServer",
+            "request": "launch",
+            "mainClass": "Lab_4.Bai5.ChatServer",
+            "projectName": "PTHTTH_21BVL_25764021_41704210"
+        },
+        {
+            "type": "java",
+            "name": "MayTinhServer",
+            "request": "launch",
+            "mainClass": "Lab_4.Bai4.MayTinhServer",
+            "projectName": "PTHTTH_21BVL_25764021_41704210"
+        },
+        {
+            "type": "java",
+            "name": "MayTinhClient",
+            "request": "launch",
+            "mainClass": "Lab_4.Bai4.MayTinhClient",
+            "projectName": "PTHTTH_21BVL_25764021_41704210"
+        },
+        {
+            "type": "java",
             "name": "HostInspector",
             "request": "launch",
             "mainClass": "Lab_4.HostInspector",
