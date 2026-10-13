@@ -1,16 +1,26 @@
+
 package KiemTraTK1;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import com.sun.net.httpserver.HttpServer;
 
 public class ChatServer {
 
-    private static final int PORT = 5000;
+    private static final int TCP_PORT = 5000;
+    private static final int HTTP_PORT = 5001;
 
     private static final String[] ROOM_NAMES = {
         "Study", "Game", "TraiNghiem"
@@ -19,31 +29,123 @@ public class ChatServer {
     private static final ConcurrentHashMap<String, Set<ClientHandler>> rooms =
             new ConcurrentHashMap<>();
 
+    private static final Set<ClientHandler> clients =
+            ConcurrentHashMap.newKeySet();
+
+    private static final AtomicInteger totalConnections =
+            new AtomicInteger(0);
+
     public static void main(String[] args) {
+
         for (String room : ROOM_NAMES) {
-            rooms.put(
-                room,
-                ConcurrentHashMap.newKeySet()
-            );
+            rooms.put(room, ConcurrentHashMap.newKeySet());
         }
 
-        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
-            System.out.println("=== CHAT SERVER ===");
-            System.out.println("Server dang chay tai port " + PORT);
+        // Khoi dong HTTP Dashboard
+        try {
+            HttpServer httpServer = HttpServer.create(
+                new InetSocketAddress(HTTP_PORT), 0
+            );
+
+            httpServer.createContext("/dashboard", exchange -> {
+                StringBuilder data = new StringBuilder();
+
+                data.append("========== CHAT SERVER DASHBOARD ==========\n");
+                data.append("Trang thai Server: ONLINE\n");
+                data.append("TCP Port: ").append(TCP_PORT).append("\n");
+                data.append("HTTP Port: ").append(HTTP_PORT).append("\n");
+                data.append("Thoi gian: ").append(
+                    LocalDateTime.now().format(
+                        DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
+                    )
+                ).append("\n\n");
+
+                data.append("Tong Client dang ket noi: ")
+                    .append(clients.size()).append("\n");
+
+                data.append("Tong luot ket noi: ")
+                    .append(totalConnections.get()).append("\n\n");
+
+                data.append("----- THONG KE PHONG CHAT -----\n");
+
+                for (String room : ROOM_NAMES) {
+                    Set<ClientHandler> members = rooms.get(room);
+
+                    data.append("Phong ").append(room)
+                        .append(": ")
+                        .append(members.size())
+                        .append(" nguoi\n");
+
+                    for (ClientHandler member : members) {
+                        data.append("  - ")
+                            .append(member.username)
+                            .append("\n");
+                    }
+                }
+
+                data.append("\n----- DANH SACH CLIENT -----\n");
+
+                for (ClientHandler client : clients) {
+                    data.append("- ").append(client.username)
+                        .append(" | Phong: ")
+                        .append(
+                            client.currentRoom == null
+                                ? "Chua vao phong"
+                                : client.currentRoom
+                        )
+                        .append("\n");
+                }
+
+                byte[] response = data.toString().getBytes(
+                    StandardCharsets.UTF_8
+                );
+
+                exchange.getResponseHeaders().set(
+                    "Content-Type", "text/plain; charset=UTF-8"
+                );
+                exchange.getResponseHeaders().set(
+                    "Cache-Control", "no-store"
+                );
+
+                exchange.sendResponseHeaders(200, response.length);
+
+                try (var body = exchange.getResponseBody()) {
+                    body.write(response);
+                }
+            });
+
+            httpServer.setExecutor(
+                java.util.concurrent.Executors.newCachedThreadPool()
+            );
+            httpServer.start();
+
+            System.out.println(
+                "Dashboard HTTP: http://localhost:" + HTTP_PORT + "/dashboard"
+            );
+
+        } catch (IOException e) {
+            System.out.println(
+                "Khong khoi dong duoc Dashboard: " + e.getMessage()
+            );
+            return;
+        }
+
+        // Khoi dong TCP Chat Server
+        try (ServerSocket serverSocket = new ServerSocket(TCP_PORT)) {
+
+            System.out.println("========== CHAT SERVER ==========");
+            System.out.println("TCP Server dang chay tai port " + TCP_PORT);
+            System.out.println("Dang cho Client ket noi...");
 
             while (true) {
                 Socket socket = serverSocket.accept();
-
-                System.out.println(
-                    "Client moi ket noi: " + socket.getInetAddress()
-                );
 
                 ClientHandler client = new ClientHandler(socket);
                 client.start();
             }
 
         } catch (IOException e) {
-            System.out.println("Loi Server: " + e.getMessage());
+            System.out.println("Loi TCP Server: " + e.getMessage());
         }
     }
 
@@ -60,15 +162,11 @@ public class ChatServer {
         out.println("ROOMS|" + String.join(",", ROOM_NAMES));
     }
 
-    private static void broadcast(
-            String room,
-            String message,
-            ClientHandler sender) {
+    private static void broadcast(String room, String message) {
+        Set<ClientHandler> members = rooms.get(room);
 
-        Set<ClientHandler> clients = rooms.get(room);
-
-        if (clients != null) {
-            for (ClientHandler client : clients) {
+        if (members != null) {
+            for (ClientHandler client : members) {
                 client.sendMessage(message);
             }
         }
@@ -77,10 +175,11 @@ public class ChatServer {
     static class ClientHandler extends Thread {
 
         private final Socket socket;
+
         private BufferedReader in;
         private PrintWriter out;
 
-        private String username;
+        private volatile String username = "Unknown";
         private volatile String currentRoom;
 
         public ClientHandler(Socket socket) {
@@ -88,20 +187,21 @@ public class ChatServer {
         }
 
         public void sendMessage(String message) {
-            out.println(message);
+            if (out != null) {
+                out.println(message);
+            }
         }
 
         private void leaveRoom() {
             String room = currentRoom;
 
             if (room != null) {
-                rooms.get(room).remove(this);
                 currentRoom = null;
+                rooms.get(room).remove(this);
 
                 broadcast(
                     room,
-                    "INFO|" + username + " da roi phong.",
-                    this
+                    "INFO|" + username + " da roi phong."
                 );
             }
         }
@@ -110,23 +210,30 @@ public class ChatServer {
         public void run() {
             try {
                 in = new BufferedReader(
-                    new InputStreamReader(socket.getInputStream())
+                    new InputStreamReader(
+                        socket.getInputStream(), StandardCharsets.UTF_8
+                    )
                 );
 
                 out = new PrintWriter(
                     socket.getOutputStream(), true
                 );
 
-                // Nhan ten nguoi dung
-                username = in.readLine();
+                String name = in.readLine();
 
-                if (username == null || username.trim().isEmpty()) {
+                if (name == null || name.trim().isEmpty()
+                        || name.contains("|")) {
                     return;
                 }
 
-                username = username.trim();
+                username = name.trim();
 
-                System.out.println(username + " da dang nhap.");
+                clients.add(this);
+                totalConnections.incrementAndGet();
+
+                System.out.println(
+                    username + " da ket noi tu " + socket.getInetAddress()
+                );
 
                 sendRooms(out);
 
@@ -134,11 +241,8 @@ public class ChatServer {
 
                 while ((message = in.readLine()) != null) {
 
-                    // Lenh JOIN|tenPhong
                     if (message.startsWith("JOIN|")) {
-                        String requestedRoom =
-                            message.substring(5).trim();
-
+                        String requestedRoom = message.substring(5).trim();
                         String room = findRoom(requestedRoom);
 
                         if (room == null) {
@@ -152,18 +256,14 @@ public class ChatServer {
                         currentRoom = room;
                         rooms.get(room).add(this);
 
-                        out.println(
-                            "INFO|Ban da vao phong " + room
-                        );
+                        out.println("INFO|Ban da vao phong " + room);
 
                         broadcast(
                             room,
-                            "INFO|" + username + " da tham gia phong.",
-                            this
+                            "INFO|" + username + " da tham gia phong."
                         );
                     }
 
-                    // Gui tin nhan den phong hien tai
                     else if (message.startsWith("MSG|")) {
                         if (currentRoom == null) {
                             out.println(
@@ -176,18 +276,15 @@ public class ChatServer {
 
                         broadcast(
                             currentRoom,
-                            "CHAT|" + username + "|" + content,
-                            this
+                            "CHAT|" + username + "|" + content
                         );
                     }
 
-                    // Roi phong va quay lai danh sach phong
                     else if (message.equals("/quit")) {
                         leaveRoom();
                         sendRooms(out);
                     }
 
-                    // Ngat ket noi
                     else if (message.equals("/exit")) {
                         out.println("INFO|Da ngat ket noi.");
                         break;
@@ -196,11 +293,12 @@ public class ChatServer {
 
             } catch (IOException e) {
                 System.out.println(
-                    "Client " + username + " da mat ket noi."
+                    "Mat ket noi voi Client: " + username
                 );
 
             } finally {
                 leaveRoom();
+                clients.remove(this);
 
                 try {
                     socket.close();
@@ -209,7 +307,7 @@ public class ChatServer {
                 }
 
                 System.out.println(
-                    "Da dong ket noi: " + username
+                    "Da ngat ket noi: " + username
                 );
             }
         }

@@ -3,6 +3,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Dashboard",
+            "request": "launch",
+            "mainClass": "KiemTraTK1.Dashboard",
+            "projectName": "PTHTTH_21BVL_25764021_1c9987e4"
+        },
+        {
+            "type": "java",
             "name": "ChatClient",
             "request": "launch",
             "mainClass": "KiemTraTK1.ChatClient",
