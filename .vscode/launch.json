@@ -3,6 +3,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "ChatClient",
+            "request": "launch",
+            "mainClass": "KiemTraTK1.ChatClient",
+            "projectName": "PTHTTH_21BVL_25764021_1c9987e4"
+        },
+        {
+            "type": "java",
+            "name": "ChatServer",
+            "request": "launch",
+            "mainClass": "KiemTraTK1.ChatServer",
+            "projectName": "PTHTTH_21BVL_25764021_1c9987e4"
+        },
+        {
+            "type": "java",
             "name": "DiscoveryClient",
             "request": "launch",
             "mainClass": "Lab_4.Bai10.DiscoveryClient",
