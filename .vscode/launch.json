@@ -3,6 +3,41 @@
     "configurations": [
         {
             "type": "java",
+            "name": "NhanVienAggregation",
+            "request": "launch",
+            "mainClass": "com.lab8.NhanVienAggregation",
+            "projectName": "jdbc-lab6"
+        },
+        {
+            "type": "java",
+            "name": "SanPhamPreparedStatement",
+            "request": "launch",
+            "mainClass": "com.lab8.SanPhamPreparedStatement",
+            "projectName": "jdbc-lab6"
+        },
+        {
+            "type": "java",
+            "name": "NhanVienJDBCTransaction",
+            "request": "launch",
+            "mainClass": "com.lab8.NhanVienJDBCTransaction",
+            "projectName": "jdbc-lab6"
+        },
+        {
+            "type": "java",
+            "name": "SanPhamJDBC",
+            "request": "launch",
+            "mainClass": "com.lab8.SanPhamJDBC",
+            "projectName": "jdbc-lab6"
+        },
+        {
+            "type": "java",
+            "name": "NhanVienJDBC",
+            "request": "launch",
+            "mainClass": "com.lab8.NhanVienJDBC",
+            "projectName": "jdbc-lab6"
+        },
+        {
+            "type": "java",
             "name": "Dashboard",
             "request": "launch",
             "mainClass": "KiemTraTK1.Dashboard",
